@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal WiFi</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f5f5f5;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .card {
+    background: white;
+    border-radius: 20px;
+    padding: 32px 24px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  .logo {
+    width: 64px; height: 64px;
+    background: #1a1a2e;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 12px;
+  }
+  .biz-name {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 4px;
+  }
+  .biz-sub {
+    text-align: center;
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 16px;
+  }
+  .wifi-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #e8f8f0;
+    color: #1a7a4a;
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin: 0 auto 20px;
+    display: flex;
+    width: fit-content;
+  }
+  .progress-bar {
+    height: 3px;
+    background: #eee;
+    border-radius: 3px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #1a1a2e;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+  .dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #eee;
+    transition: all 0.3s;
+  }
+  .dot.active { background: #1a1a2e; }
+  .dot.done { background: #1a7a4a; }
+  .step-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a2e;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .step-desc {
+    font-size: 13px;
+    color: #888;
+    text-align: center;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .field-label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 6px;
+    display: block;
+  }
+  input, select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid #e5e5e5;
+    border-radius: 10px;
+    font-size: 15px;
+    color: #1a1a2e;
+    margin-bottom: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+    background: white;
+  }
+  input:focus, select:focus { border-color: #1a1a2e; }
+  input.error { border-color: #e74c3c; }
+  .phone-wrap {
+    display: flex;
+    align-items: center;
+    border: 1.5px solid #e5e5e5;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .phone-wrap:focus-within { border-color: #1a1a2e; }
+  .phone-prefix {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    font-size: 14px;
+    color: #666;
+    border-right: 1.5px solid #e5e5e5;
+    height: 48px;
+    white-space: nowrap;
+  }
+  .phone-input {
+    border: none !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    flex: 1;
+  }
+  .sex-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .sex-opt {
+    flex: 1;
+    padding: 10px 6px;
+    border: 1.5px solid #e5e5e5;
+    border-radius: 10px;
+    font-size: 13px;
+    color: #666;
+    background: white;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .sex-opt.selected {
+    background: #1a1a2e;
+    color: white;
+    border-color: #1a1a2e;
+  }
+  .btn-main {
+    width: 100%;
+    background: #1a1a2e;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity 0.2s;
+  }
+  .btn-main:hover { opacity: 0.88; }
+  .btn-main:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-back {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: #aaa;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 10px;
+    font-family: inherit;
+    margin-top: 4px;
+  }
+  .legal {
+    font-size: 11px;
+    color: #bbb;
+    text-align: center;
+    line-height: 1.5;
+    margin-top: 14px;
+  }
+  .error-msg {
+    font-size: 12px;
+    color: #e74c3c;
+    margin-top: -10px;
+    margin-bottom: 10px;
+    display: none;
+  }
+
+  /* Pantalla de éxito */
+  .success-screen {
+    text-align: center;
+  }
+  .check-circle {
+    width: 72px; height: 72px;
+    background: #e8f8f0;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+  }
+  .success-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+  }
+  .success-desc {
+    font-size: 14px;
+    color: #888;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .btn-wpp {
+    width: 100%;
+    background: #25D366;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .btn-menu {
+    width: 100%;
+    background: transparent;
+    color: #1a1a2e;
+    border: 1.5px solid #e5e5e5;
+    border-radius: 10px;
+    padding: 13px;
+    font-size: 15px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  /* Pantalla ya registrado */
+  .already-screen { text-align: center; }
+  .info-circle {
+    width: 72px; height: 72px;
+    background: #e8f0ff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+  }
+
+  /* Loading */
+  .loading { display: none; text-align: center; padding: 20px 0; }
+  .spinner {
+    width: 32px; height: 32px;
+    border: 3px solid #eee;
+    border-top-color: #1a1a2e;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .step { display: none; }
+  .step.active { display: block; }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- HEADER (visible en steps 1-3) -->
+  <div id="header">
+    <div class="logo">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <path d="M8 20 Q16 8 24 20" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M11 23 Q16 15 21 23" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="16" cy="26" r="2" fill="white"/>
+      </svg>
+    </div>
+    <div class="biz-name" id="biz-name-display">Cargando...</div>
+    <div class="biz-sub" id="biz-city-display"></div>
+    <div class="wifi-badge">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+        <path d="M5 12.5 Q12 5 19 12.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M8 15.5 Q12 11 16 15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="12" cy="19" r="1.5" fill="currentColor"/>
+      </svg>
+      WiFi gratuito disponible
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress" style="width:33%"></div></div>
+    <div class="dots">
+      <div class="dot active" id="dot1"></div>
+      <div class="dot" id="dot2"></div>
+      <div class="dot" id="dot3"></div>
+    </div>
+  </div>
+
+  <!-- STEP 1: Nombre -->
+  <div class="step active" id="step1">
+    <div class="step-title">¿Cómo te llamás?</div>
+    <div class="step-desc">Solo lo pedimos una vez para personalizar tu experiencia.</div>
+    <label class="field-label">Nombre completo</label>
+    <input type="text" id="input-nombre" placeholder="Ej: María González" autocomplete="name" />
+    <div class="error-msg" id="err-nombre">Por favor ingresá tu nombre.</div>
+    <button class="btn-main" onclick="goStep2()">Continuar</button>
+    <div class="legal">Tus datos solo serán usados por este negocio para enviarte promociones por WhatsApp.</div>
+  </div>
+
+  <!-- STEP 2: Teléfono + Fecha -->
+  <div class="step" id="step2">
+    <div class="step-title">Tu número y cumpleaños</div>
+    <div class="step-desc">Para enviarte promociones y tu regalo de cumpleaños.</div>
+    <label class="field-label">Número de WhatsApp</label>
+    <div class="phone-wrap" id="phone-wrap">
+      <div class="phone-prefix">🇵🇾 +595</div>
+      <input type="tel" class="phone-input" id="input-telefono" placeholder="981 234 567" />
+    </div>
+    <div class="error-msg" id="err-telefono">Ingresá un número válido.</div>
+    <label class="field-label">Fecha de nacimiento</label>
+    <input type="date" id="input-fecha" />
+    <div class="error-msg" id="err-fecha">Ingresá tu fecha de nacimiento.</div>
+    <button class="btn-main" onclick="goStep3()">Continuar</button>
+    <button class="btn-back" onclick="goBack(1)">← Volver</button>
+  </div>
+
+  <!-- STEP 3: Sexo -->
+  <div class="step" id="step3">
+    <div class="step-title">¿Cuál es tu sexo?</div>
+    <div class="step-desc">Último paso para completar tu registro.</div>
+    <div class="sex-row">
+      <button class="sex-opt" id="sx-M" onclick="selectSex('M')">Masculino</button>
+      <button class="sex-opt" id="sx-F" onclick="selectSex('F')">Femenino</button>
+      <button class="sex-opt" id="sx-O" onclick="selectSex('O')">Otro</button>
+    </div>
+    <div class="error-msg" id="err-sexo">Seleccioná una opción.</div>
+    <button class="btn-main" id="btn-finish" onclick="submitForm()">Finalizar registro</button>
+    <button class="btn-back" onclick="goBack(2)">← Volver</button>
+    <div class="legal">Al registrarte aceptás recibir mensajes de WhatsApp de este negocio con promociones y novedades.</div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div style="color:#888; font-size:14px;">Registrando...</div>
+  </div>
+
+  <!-- ÉXITO -->
+  <div class="step" id="step-success">
+    <div class="success-screen">
+      <div class="check-circle">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+          <path d="M5 12l5 5L19 7" stroke="#1a7a4a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="success-title" id="success-title">¡Bienvenida!</div>
+      <div class="success-desc" id="success-desc">Ya podés conectarte al WiFi y ver el menú.</div>
+      <button class="btn-wpp" id="btn-wpp">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+        Seguinos en WhatsApp
+      </button>
+      <button class="btn-menu" id="btn-menu">Ver el menú</button>
+    </div>
+  </div>
+
+  <!-- YA REGISTRADO -->
+  <div class="step" id="step-already">
+    <div class="already-screen">
+      <div class="info-circle">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="9" stroke="#3b5bdb" stroke-width="2"/>
+          <path d="M12 8v4M12 16h.01" stroke="#3b5bdb" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="success-title" id="already-title">¡Hola de nuevo!</div>
+      <div class="success-desc">Ya estás registrado. No necesitás volver a ingresar tus datos.</div>
+      <button class="btn-main" id="btn-already-menu">Ir al menú</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ============================================================
+  // CONFIGURACIÓN — REEMPLAZÁ ESTOS VALORES CON LOS DE TU NEGOCIO
+  // ============================================================
+  var SUPABASE_URL = 'https://auzeuotspmgcppzngzve.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1emV1b3RzcG1nY3Bwem5nenZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MDYxMDAsImV4cCI6MjA5MDQ4MjEwMH0.sdr9pfwmjp4mNTVNmcj6wOCDc3RURFqWmchrhpygb3M';
+  var NEGOCIO_NOMBRE = 'Restaurante El Fogón';
+  var NEGOCIO_CIUDAD = 'Asunción, Paraguay';
+  var NEGOCIO_WHATSAPP = '595981000000'; // número sin + ni espacios
+  var MENU_URL = 'https://tu-menu.com'; // link del menú digital
+  var ORIGEN = 'qr'; // 'qr' o 'wifi'
+  // ============================================================
+
+  var sexSelected = null;
+
+  // Mostrar nombre del negocio
+  document.getElementById('biz-name-display').textContent = NEGOCIO_NOMBRE;
+  document.getElementById('biz-city-display').textContent = NEGOCIO_CIUDAD;
+
+  // Botones de destino
+  document.getElementById('btn-wpp').onclick = function() {
+    window.location.href = 'https://wa.me/' + NEGOCIO_WHATSAPP;
+  };
+  document.getElementById('btn-menu').onclick = function() {
+    window.location.href = MENU_URL;
+  };
+  document.getElementById('btn-already-menu').onclick = function() {
+    window.location.href = MENU_URL;
+  };
+
+  // Verificar si ya está registrado
+  var registrado = localStorage.getItem('portal_registrado_' + NEGOCIO_NOMBRE);
+  if (registrado) {
+    var datos = JSON.parse(registrado);
+    document.getElementById('header').style.display = 'none';
+    document.getElementById('step1').classList.remove('active');
+    var titulo = datos.sexo === 'F' ? 'Hola de nuevo, ' + datos.nombre.split(' ')[0] + '!' : 'Hola de nuevo, ' + datos.nombre.split(' ')[0] + '!';
+    document.getElementById('already-title').textContent = titulo;
+    document.getElementById('step-already').classList.add('active');
+  }
+
+  function showStep(id) {
+    document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+  }
+
+  function updateDots(step) {
+    var prog = { 1: '33%', 2: '66%', 3: '99%' };
+    document.getElementById('progress').style.width = prog[step] || '33%';
+    for (var i = 1; i <= 3; i++) {
+      var d = document.getElementById('dot' + i);
+      d.className = 'dot';
+      if (i < step) d.classList.add('done');
+      else if (i === step) d.classList.add('active');
+    }
+  }
+
+  function goStep2() {
+    var nombre = document.getElementById('input-nombre').value.trim();
+    if (!nombre) {
+      document.getElementById('input-nombre').classList.add('error');
+      document.getElementById('err-nombre').style.display = 'block';
+      return;
+    }
+    document.getElementById('input-nombre').classList.remove('error');
+    document.getElementById('err-nombre').style.display = 'none';
+    updateDots(2);
+    showStep('step2');
+  }
+
+  function goStep3() {
+    var tel = document.getElementById('input-telefono').value.trim();
+    var fecha = document.getElementById('input-fecha').value;
+    var ok = true;
+    if (!tel || tel.length < 7) {
+      document.getElementById('phone-wrap').style.borderColor = '#e74c3c';
+      document.getElementById('err-telefono').style.display = 'block';
+      ok = false;
+    } else {
+      document.getElementById('phone-wrap').style.borderColor = '#e5e5e5';
+      document.getElementById('err-telefono').style.display = 'none';
+    }
+    if (!fecha) {
+      document.getElementById('input-fecha').classList.add('error');
+      document.getElementById('err-fecha').style.display = 'block';
+      ok = false;
+    } else {
+      document.getElementById('input-fecha').classList.remove('error');
+      document.getElementById('err-fecha').style.display = 'none';
+    }
+    if (!ok) return;
+    updateDots(3);
+    showStep('step3');
+  }
+
+  function goBack(step) {
+    updateDots(step);
+    showStep('step' + step);
+  }
+
+  function selectSex(s) {
+    sexSelected = s;
+    ['M', 'F', 'O'].forEach(function(x) {
+      document.getElementById('sx-' + x).classList.remove('selected');
+    });
+    document.getElementById('sx-' + s).classList.add('selected');
+    document.getElementById('err-sexo').style.display = 'none';
+  }
+
+  async function submitForm() {
+    if (!sexSelected) {
+      document.getElementById('err-sexo').style.display = 'block';
+      return;
+    }
+
+    var nombre = document.getElementById('input-nombre').value.trim();
+    var telefono = '+595' + document.getElementById('input-telefono').value.trim();
+    var fecha = document.getElementById('input-fecha').value;
+    var sexo = sexSelected === 'M' ? 'Masculino' : sexSelected === 'F' ? 'Femenino' : 'Otro';
+
+    // Mostrar loading
+    document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
+    document.getElementById('header').style.display = 'none';
+    document.getElementById('loading').style.display = 'block';
+
+    try {
+      var response = await fetch(SUPABASE_URL + '/rest/v1/clientes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          nombre: nombre,
+          telefono: telefono,
+          fecha_nacimiento: fecha,
+          sexo: sexo,
+          origen: ORIGEN
+        })
+      });
+
+      document.getElementById('loading').style.display = 'none';
+
+      if (response.ok || response.status === 201) {
+        // Guardar en localStorage
+        localStorage.setItem('portal_registrado_' + NEGOCIO_NOMBRE, JSON.stringify({
+          nombre: nombre, sexo: sexSelected
+        }));
+
+        // Pantalla de éxito
+        var primerNombre = nombre.split(' ')[0];
+        var gen = sexSelected === 'F' ? 'a' : 'o';
+        document.getElementById('success-title').textContent = '¡Bienvenid' + gen + ', ' + primerNombre + '!';
+
+        var d = new Date(fecha + 'T00:00:00');
+        var meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+        document.getElementById('success-desc').textContent =
+          'Ya podés conectarte al WiFi y ver el menú. El ' + d.getDate() + ' de ' + meses[d.getMonth()] + ' te mandamos tu regalo de cumpleaños por WhatsApp.';
+
+        showStep('step-success');
+      } else {
+        alert('Hubo un error al registrarte. Intentá de nuevo.');
+        document.getElementById('header').style.display = 'block';
+        updateDots(3);
+        showStep('step3');
+      }
+    } catch (e) {
+      document.getElementById('loading').style.display = 'none';
+      alert('Error de conexión. Verificá tu internet e intentá de nuevo.');
+      document.getElementById('header').style.display = 'block';
+      updateDots(3);
+      showStep('step3');
+    }
+  }
+</script>
+</body>
+</html>
