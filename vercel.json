@@ -1,6 +1,7 @@
 {
   "rewrites": [
-    { "source": "/panel", "destination": "/panel.html" },
+    { "source": "/panel", "destination": "/panel2.html" },
+    { "source": "/menu", "destination": "/menu.html" },
     { "source": "/", "destination": "/index.html" }
   ]
 }
